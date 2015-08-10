@@ -96,30 +96,37 @@ fetch_table <- function(offset) {
 big_table_list <- Map(fetch_table, seq(from=0, to=num_results-1, by=1000))
 big_table <- Reduce(function(...) merge(..., all=T, sort=FALSE), big_table_list)
 names(big_table) <- c("Basho", "Day", "Rank.1", "Shikona.1", "Result.1", "Outcome.1", "Kimarite", "Outcome.2", "Rank.2", "Shikona.2", "Result.2")
-formatted_table <- sapply(big_table, setup_table_for_regression)
-formatted_table <- matrix(formatted_table, 2*nrow(big_table), 8)
+formatted_table <- t(apply(big_table, 1, setup_table_for_regression))
+sumo.data <- data.frame("Basho"=formatted_table[,1], "Day"=formatted_table[,2], "Rank Difference"=formatted_table[,3], 
+                             "Shikona"=formatted_table[,4], "Wins"=formatted_table[,5], "Match.Outcome"=formatted_table[,6], 
+                             "Kimarite"=formatted_table[,7], "Bubble"=formatted_table[,8], "Wrestler.Interaction"=formatted_table[,9])
 
-# Create a 1d vector of data
+
+# Create a 0d vector of data
 # Initialize into 6 x 2*nrows(original) matrix
 # Convert to dataframe?
 # Carry out linear regression
 
 # TEST per-cell processing
-sumo_data_table <- readHTMLTable("http://sumodb.sumogames.de/Query_bout.aspx?show_form=0&year=1989.01-2000.01&m=on&rowcount=1&offset=0", header=c("Basho", "Day", "Rank.1", "Shikona.1", "Result.1", "Outcome Icon.1", "Kimarite", "Rank.2", "Shikona.2", "Result.2", "Outcome Icon.2"), skip.rows=c(1:2, 5:50), which=1, elFun=test_elFun, stringsAsFactors=FALSE)
-sumo_data_table
+test.cellwise.processiong = function() {
+    sumo_data_table <- readHTMLTable("http://sumodb.sumogames.de/Query_bout.aspx?show_form=0&year=1989.01-2000.01&m=on&rowcount=1&offset=0", header=c("Basho", "Day", "Rank.1", "Shikona.1", "Result.1", "Outcome Icon.1", "Kimarite", "Rank.2", "Shikona.2", "Result.2", "Outcome Icon.2"), skip.rows=c(1:2, 5:50), which=1, elFun=test_elFun, stringsAsFactors=FALSE)
+    sumo_data_table
+}
 # END TEST
 
 # TEST table processing
-url = "http://sumodb.sumogames.de/Query_bout.aspx?show_form=0&year=1989.01-2000.01&m=on&rowcount=1&offset=%d"
-fetch_table <- function(offset) {
-    print(offset)
-    return(readHTMLTable(sprintf(url, offset), skip.rows=c(1), which=1, elFun=test_elFun, stringsAsFactors=FALSE))
+test.table.processing = function() {
+    url = "http://sumodb.sumogames.de/Query_bout.aspx?show_form=0&year=1989.01-2000.01&m=on&rowcount=1&offset=%d"
+    fetch_table <- function(offset) {
+        print(offset)
+        return(readHTMLTable(sprintf(url, offset), skip.rows=c(1), which=1, elFun=test_elFun, stringsAsFactors=TRUE))
+    }
+    big_table_list <- Map(fetch_table, seq(from=0, to=150-1, by=50))
+    big_table <- Reduce(function(...) merge(..., all=T, sort=FALSE), big_table_list)
+    names(big_table) <- c("Basho", "Day", "Rank.1", "Shikona.1", "Result.1", "Outcome.1", "Kimarite", "Outcome.2", "Rank.2", "Shikona.2", "Result.2")
+    formatted_table <- sapply(big_table, setup_table_for_regression)
+    formatted_table <- matrix(formatted_table, 2*nrow(big_table), 8)
 }
-big_table_list <- Map(fetch_table, seq(from=0, to=150-1, by=50))
-big_table <- Reduce(function(...) merge(..., all=T, sort=FALSE), big_table_list)
-names(big_table) <- c("Basho", "Day", "Rank.1", "Shikona.1", "Result.1", "Outcome.1", "Kimarite", "Outcome.2", "Rank.2", "Shikona.2", "Result.2")
-formatted_table <- sapply(big_table, setup_table_for_regression)
-formatted_table <- matrix(formatted_table, 2*nrow(big_table), 8)
 
 
 # END TEST
