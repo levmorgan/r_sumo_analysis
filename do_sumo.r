@@ -36,16 +36,54 @@ test_elFun = function(node) {
 
 # Use sapply to create rank difference, bubble, and constant columns, as well as to duplicate needed data for rikishi
 # Make columns:
-# Basho.1 Day.1 Rank.Difference.1 Shikona.1 Result.1 Wins.1 Kimarite.1 Interaction.1 Basho.2 Day.2 Rank.Difference.2 Shikona.2 Result.2 Wins.2 Kimarite.2 Interaction.2
+# Basho.1 Day.1 Rank.Difference.1 Shikona.1 Result.1 Wins.1 Kimarite.1 Bubble.1 Interaction.1 Basho.2 Day.2 Rank.Difference.2 Shikona.2 Result.2 Wins.2 Kimarite.2 Bubble.2 Interaction.2
 # Fixed effects variables can be: Shikona, maybe a Shikona.1 x Shikona.2 interaction?
+
+on_margin <- function(wins, day) {
+    # Return whether a wrestler is in the running for a positive score (8 wins)
+    # in the last 5 days of a tournament, but doesn't yet have them
+    days.left <- 16 - as.integer(day)
+    wins.needed = 8 - as.integer(wins)
+    if(days.left <= 5) {
+        if(wins.needed > 0 && wins.needed <= days.left) {
+            return(1)
+        }
+    }
+    return(0)
+
+}
+
 setup_table_for_regression = function(row) {
-    rank.difference.1 <- as.integer(row[3]) - as.integer(row[9])
-    rank.difference.2 <- as.integer(row[9]) - as.integer(row[3])
-    interaction <- paste(sort(c(row[4], row[10])), collapse=" ")
+    tryCatch({
+        rank.difference.1 <- as.integer(row[3]) - as.integer(row[9])
+        #rank.difference.2 <- as.integer(row[9]) - as.integer(row[3])
+        interaction <- paste(sort(c(row[4], row[10])), collapse=" ")
+        wins.1 =  as.integer(sub("\\(?([0-9]+)[ \\-]([0-9]+)\\)?.*", "\\1", row[5]))
+        #wins.2 =  as.integer(sub("\\(?([0-9]+)[ \\-]([0-9]+)\\)?.*", "\\1", row[11]))
+        # wins.1 <- as.integer(unlist(strsplit(row[5], " "))[1])
+        # wins.2 <- as.integer(unlist(strsplit(row[9], " "))[1])
+        bubble.1 <- on_margin(wins.1, row[2])
+        #bubble.2 <- on_margin(wins.2, row[2])
+    }, warning = function(w) {
+        print(sprintf("Got a warning %s", as.character(w)))
+        print("While working on row:")
+        print(row)
+    })
+
+    if(bubble.1 == bubble.2) {
+        bubble.1 <- 0
+        bubble.2 <- 0
+    } else if (bubble.1 == 1) {
+        bubble.2 <- -1
+    } else if (bubble.2 == 1) {
+        bubble.1 <- -1
+    }
 
     # Compute bubble
-    return(c(row[1], row[2], rank.difference.1, row[4], row[5], row[6], row[7], interaction, row[1], row[2], rank.difference.2, row[10], row[11], row[8], row[7], interaction))
+    return(c(row[1], row[2], rank.difference.1, row[4], wins.1, row[6], row[7], bubble.1, interaction))
+             #row[1], row[2], rank.difference.2, row[10], wins.2, row[8], row[7], bubble.2, interaction))
 }
+formatted_table <- apply(big_table, 1, setup_table_for_regression)
 
 #num_results = as.integer(unlist(strsplit(xmlValue(tree$children$html[['body']][['div']][['div']][['div']][['div']
 url = "http://sumodb.sumogames.de/Query_bout.aspx?show_form=0&year=1989.01-2000.01&m=on&rowcount=5&offset=%d"
