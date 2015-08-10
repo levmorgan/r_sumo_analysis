@@ -1,11 +1,11 @@
-library("xml")
+library("XML")
 
 # Loop: fetch and merge sumo tables
 
 test_elFun = function(node) {
     if(length(node) > 0 && xmlName(node[[1]]) == "img") {
         node_attrs <- xmlAttrs(node[[1]])
-        if(any(node_attrs == "img/hoshi_kuro.gif") || any(node_attrs == "img/hoshi_fusenpai.gif:")) {
+        if(any(node_attrs == "img/hoshi_kuro.gif") || any(node_attrs == "img/hoshi_fusenpai.gif")) {
             return("0")
         }
         if(any(node_attrs == "img/hoshi_shiro.gif") ||  any(node_attrs == "img/hoshi_fusensho.gif")) {
