@@ -59,11 +59,11 @@ setup_table_for_regression = function(row) {
         #rank.difference.2 <- as.integer(row[9]) - as.integer(row[3])
         interaction <- paste(sort(c(row[4], row[10])), collapse=" ")
         wins.1 =  as.integer(sub("\\(?([0-9]+)[ \\-]([0-9]+)\\)?.*", "\\1", row[5]))
-        #wins.2 =  as.integer(sub("\\(?([0-9]+)[ \\-]([0-9]+)\\)?.*", "\\1", row[11]))
+        wins.2 =  as.integer(sub("\\(?([0-9]+)[ \\-]([0-9]+)\\)?.*", "\\1", row[11]))
         # wins.1 <- as.integer(unlist(strsplit(row[5], " "))[1])
         # wins.2 <- as.integer(unlist(strsplit(row[9], " "))[1])
         bubble.1 <- on_margin(wins.1, row[2])
-        #bubble.2 <- on_margin(wins.2, row[2])
+        bubble.2 <- on_margin(wins.2, row[2])
     }, warning = function(w) {
         print(sprintf("Got a warning %s", as.character(w)))
         print("While working on row:")
@@ -83,7 +83,6 @@ setup_table_for_regression = function(row) {
     return(c(row[1], row[2], rank.difference.1, row[4], wins.1, row[6], row[7], bubble.1, interaction))
              #row[1], row[2], rank.difference.2, row[10], wins.2, row[8], row[7], bubble.2, interaction))
 }
-formatted_table <- apply(big_table, 1, setup_table_for_regression)
 
 #num_results = as.integer(unlist(strsplit(xmlValue(tree$children$html[['body']][['div']][['div']][['div']][['div']
 url = "http://sumodb.sumogames.de/Query_bout.aspx?show_form=0&year=1989.01-2000.01&m=on&rowcount=5&offset=%d"
