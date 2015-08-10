@@ -5,19 +5,19 @@ library("xml")
 test_elFun = function(node) {
     if(length(node) > 0 && xmlName(node[[1]]) == "img") {
         node_attrs <- xmlAttrs(node[[1]])
-        if(any(node_attrs == "img/hoshi_kuro.gif")) {
+        if(any(node_attrs == "img/hoshi_kuro.gif") || any(node_attrs == "img/hoshi_fusenpai.gif:")) {
             return("0")
         }
-        if(any(node_attrs == "img/hoshi_shiro.gif")) {
+        if(any(node_attrs == "img/hoshi_shiro.gif") ||  any(node_attrs == "img/hoshi_fusensho.gif")) {
             return("1")
         }
         return(node_attrs[[1]])
     }
     value <- xmlValue(node)
-    if(any(grep("[YOSKM][0-9]{1,2}[we]", value))) {
+    if(any(grep("[YOSKMJ][0-9]{1,2}[we]", value))) {
         rank <- value
         num_rank <- 0
-        num_rank <- num_rank + switch(substr(rank, 1, 1), "Y"=0, "O"=3, "S"=6, "K"=9, "M"=12)
+        num_rank <- num_rank + switch(substr(rank, 1, 1), "Y"=0, "O"=3, "S"=6, "K"=8, "M"=10, "J"=42)
         if(any(grep("[0-9]", substr(rank, 3, 3)))) {
             num_rank <- num_rank + as.integer(substr(rank, 2, 3))
             if(substr(rank, 4, 4) == "w") num_rank <- num_rank + 1
