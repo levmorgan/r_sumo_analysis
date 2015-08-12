@@ -95,11 +95,42 @@ big_table_list <- Map(fetch_table, seq(from=0, to=num_results-1, by=1000))
 big_table <- Reduce(function(...) merge(..., all=T, sort=FALSE), big_table_list)
 names(big_table) <- c("Basho", "Day", "Rank.1", "Shikona.1", "Result.1", "Outcome.1", "Kimarite", "Outcome.2", "Rank.2", "Shikona.2", "Result.2")
 formatted_table <- t(apply(big_table, 1, setup_table_for_regression))
-sumo.data <- data.frame("Basho"=formatted_table[,1], "Day"=formatted_table[,2], "Rank Difference"=formatted_table[,3], 
-                             "Shikona"=formatted_table[,4], "Wins"=formatted_table[,5], "Match.Outcome"=formatted_table[,6], 
-                             "Kimarite"=formatted_table[,7], "Bubble"=formatted_table[,8], "Wrestler.Interaction"=formatted_table[,9])
+sumo.data <- data.frame("Basho"=formatted_table[,1], "Day"=formatted_table[,2], "Rank.Difference"=formatted_table[,3], 
+                             "Shikona.1"=formatted_table[,4], "Shikona.2"=formatted_table[,5], "Wins"=formatted_table[,6], "Match.Outcome"=formatted_table[,7], 
+                             "Kimarite"=formatted_table[,8], "Bubble"=formatted_table[,9])
+
+sumo.data$Rank.Difference <- as.integer(as.character(sumo.data$Rank.Difference))
+sumo.glmdata <- sumo.data
+glm.1 <- glm(Match.Outcome ~ Bubble*Day, data=sumo.glmdata, family="binomial") 
+glm.2 <- glm(Match.Outcome ~ Bubble*Day + Rank.Difference, data=sumo.glmdata, family="binomial") 
+glm.3 <- glm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2, data=sumo.glmdata, family="binomial") 
+glm.4 <- glm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Rank.Difference, data=sumo.glmdata, family="binomial")
+glm.5 <- glm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Shikona.1*Shikona.2, data=sumo.glmdata, family="binomial")
+glm.6 <- glm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Shikona.1*Shikona.2 + Rank.Difference, data=sumo.glmdata, family="binomial")
+# glm.3 <- glm(Match.Outcome ~ Shikona.1 + Shikona.2 + Bubble*Day, data=sumo.glmdata, family="binomial")
+sumo.lmdata <- sumo.data
+sumo.lmdata$Match.Outcome <- as.integer(as.character(sumo.data$Match.Outcome))
+lm.1 <- lm(Match.Outcome ~ Bubble*Day, data=sumo.lmdata) 
+lm.2 <- lm(Match.Outcome ~ Bubble*Day + Rank.Difference, data=sumo.lmdata) 
+lm.3 <- lm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2, data=sumo.lmdata) 
+lm.4 <- lm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Rank.Difference, data=sumo.lmdata)
+lm.5 <- lm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Shikona.1*Shikona.2, data=sumo.lmdata)
+lm.6 <- lm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Shikona.1*Shikona.2 + Rank.Difference, data=sumo.lmdata)
+summary(lm.4.15)
 
 
+lm.1 <- lm(Match.Outcome ~ Bubble*Day, data=sumo.lmdata) 
+lm.2 <- lm(Match.Outcome ~ Bubble*Day + Rank.Difference, data=sumo.lmdata) 
+lm.3 <- lm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2, data=sumo.lmdata) 
+lm.4 <- lm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Rank.Difference, data=sumo.lmdata)
+lm.5 <- lm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Shikona.1*Shikona.2, data=sumo.lmdata)
+lm.6 <- lm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Shikona.1*Shikona.2 + Rank.Difference, data=sumo.lmdata)
+glm.1 <- glm(Match.Outcome ~ Bubble*Day, data=sumo.glmdata, family="binomial") 
+glm.2 <- glm(Match.Outcome ~ Bubble*Day + Rank.Difference, data=sumo.glmdata, family="binomial") 
+glm.3 <- glm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2, data=sumo.glmdata, family="binomial") 
+glm.4 <- glm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Rank.Difference, data=sumo.glmdata, family="binomial")
+glm.5 <- glm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Shikona.1*Shikona.2, data=sumo.glmdata, family="binomial")
+glm.6 <- glm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Shikona.1*Shikona.2 + Rank.Difference, data=sumo.glmdata, family="binomial")
 # Create a 0d vector of data
 # Initialize into 6 x 2*nrows(original) matrix
 # Convert to dataframe?
