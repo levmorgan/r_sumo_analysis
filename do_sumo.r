@@ -34,11 +34,6 @@ test_elFun = function(node) {
     return(value)
 }
 
-# Use sapply to create rank difference, bubble, and constant columns, as well as to duplicate needed data for rikishi
-# Make columns:
-# Basho.1 Day.1 Rank.Difference.1 Shikona.1 Result.1 Wins.1 Kimarite.1 Bubble.1 Interaction.1 Basho.2 Day.2 Rank.Difference.2 Shikona.2 Result.2 Wins.2 Kimarite.2 Bubble.2 Interaction.2
-# Fixed effects variables can be: Shikona, maybe a Shikona.1 x Shikona.2 interaction?
-
 on_margin <- function(wins, day) {
     # Return whether a wrestler is in the running for a positive score (8 wins)
     # in the last 5 days of a tournament, but doesn't yet have them
@@ -82,7 +77,8 @@ setup_table_for_regression = function(row) {
              #row[1], row[2], rank.difference.2, row[10], wins.2, row[8], row[7], bubble.2, interaction))
 }
 
-#num_results = as.integer(unlist(strsplit(xmlValue(tree$children$html[['body']][['div']][['div']][['div']][['div']
+# Fetch sumo data from sumodb
+## Get the number of items to fetch
 url = "http://sumodb.sumogames.de/Query_bout.aspx?show_form=0&year=1989.01-2010.01&m=on&rowcount=5&offset=%d"
 tree = htmlTreeParse(sprintf(url, 0))
 num_results <- as.integer(strsplit(grep("[0-9]+ results found", unlist(tree$children$html[["body"]]), value=TRUE), " ")[[1]][[1]])
@@ -91,50 +87,37 @@ fetch_table <- function(offset) {
     return(readHTMLTable(sprintf(url, offset), skip.rows=c(1), which=1, elFun=test_elFun, stringsAsFactors=FALSE))
 }
 
+## Scrape each 1000 item page to a table, then merge the tables
 big_table_list <- Map(fetch_table, seq(from=0, to=num_results-1, by=1000))
 big_table <- Reduce(function(...) merge(..., all=T, sort=FALSE), big_table_list)
 names(big_table) <- c("Basho", "Day", "Rank.1", "Shikona.1", "Result.1", "Outcome.1", "Kimarite", "Outcome.2", "Rank.2", "Shikona.2", "Result.2")
+
+# Reformat the table so we can perform our regressions
 formatted_table <- t(apply(big_table, 1, setup_table_for_regression))
 sumo.data <- data.frame("Basho"=formatted_table[,1], "Day"=formatted_table[,2], "Rank.Difference"=formatted_table[,3], 
                              "Shikona.1"=formatted_table[,4], "Shikona.2"=formatted_table[,5], "Wins"=formatted_table[,6], "Match.Outcome"=formatted_table[,7], 
                              "Kimarite"=formatted_table[,8], "Bubble"=formatted_table[,9])
-
 sumo.data$Rank.Difference <- as.integer(as.character(sumo.data$Rank.Difference))
 sumo.glmdata <- sumo.data
-glm.1 <- glm(Match.Outcome ~ Bubble*Day, data=sumo.glmdata, family="binomial") 
-glm.2 <- glm(Match.Outcome ~ Bubble*Day + Rank.Difference, data=sumo.glmdata, family="binomial") 
-glm.3 <- glm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2, data=sumo.glmdata, family="binomial") 
-glm.4 <- glm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Rank.Difference, data=sumo.glmdata, family="binomial")
-glm.5 <- glm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Shikona.1*Shikona.2, data=sumo.glmdata, family="binomial")
-glm.6 <- glm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Shikona.1*Shikona.2 + Rank.Difference, data=sumo.glmdata, family="binomial")
-# glm.3 <- glm(Match.Outcome ~ Shikona.1 + Shikona.2 + Bubble*Day, data=sumo.glmdata, family="binomial")
 sumo.lmdata <- sumo.data
 sumo.lmdata$Match.Outcome <- as.integer(as.character(sumo.data$Match.Outcome))
+
+# Create linear probability models, exactly as specified in (Duggan, Levitt 2002)
 lm.1 <- lm(Match.Outcome ~ Bubble*Day, data=sumo.lmdata) 
 lm.2 <- lm(Match.Outcome ~ Bubble*Day + Rank.Difference, data=sumo.lmdata) 
 lm.3 <- lm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2, data=sumo.lmdata) 
 lm.4 <- lm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Rank.Difference, data=sumo.lmdata)
 lm.5 <- lm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Shikona.1*Shikona.2, data=sumo.lmdata)
 lm.6 <- lm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Shikona.1*Shikona.2 + Rank.Difference, data=sumo.lmdata)
-summary(lm.4.15)
 
-
-lm.1 <- lm(Match.Outcome ~ Bubble*Day, data=sumo.lmdata) 
-lm.2 <- lm(Match.Outcome ~ Bubble*Day + Rank.Difference, data=sumo.lmdata) 
-lm.3 <- lm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2, data=sumo.lmdata) 
-lm.4 <- lm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Rank.Difference, data=sumo.lmdata)
-lm.5 <- lm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Shikona.1*Shikona.2, data=sumo.lmdata)
-lm.6 <- lm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Shikona.1*Shikona.2 + Rank.Difference, data=sumo.lmdata)
+# Linear probability models have a lot of problems, like not being bounded in the output variable.
+# Let's try our regression using a logit model instead, since it matches the demands of this problem better,
 glm.1 <- glm(Match.Outcome ~ Bubble*Day, data=sumo.glmdata, family="binomial") 
 glm.2 <- glm(Match.Outcome ~ Bubble*Day + Rank.Difference, data=sumo.glmdata, family="binomial") 
 glm.3 <- glm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2, data=sumo.glmdata, family="binomial") 
 glm.4 <- glm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Rank.Difference, data=sumo.glmdata, family="binomial")
 glm.5 <- glm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Shikona.1*Shikona.2, data=sumo.glmdata, family="binomial")
 glm.6 <- glm(Match.Outcome ~ 0 + Bubble*Day + Shikona.1 + Shikona.2 + Shikona.1*Shikona.2 + Rank.Difference, data=sumo.glmdata, family="binomial")
-# Create a 0d vector of data
-# Initialize into 6 x 2*nrows(original) matrix
-# Convert to dataframe?
-# Carry out linear regression
 
 # TEST per-cell processing
 test.cellwise.processiong = function() {
