@@ -44,10 +44,8 @@ on_margin <- function(wins, day) {
     # in the last 5 days of a tournament, but doesn't yet have them
     days.left <- 16 - as.integer(day)
     wins.needed = 8 - as.integer(wins)
-    if(days.left <= 5) {
-        if(wins.needed > 0 && wins.needed <= days.left) {
-            return(1)
-        }
+    if(wins.needed > 0 && wins.needed <= days.left) {
+        return(1)
     }
     return(0)
 
@@ -80,12 +78,12 @@ setup_table_for_regression = function(row) {
     }
 
     # Compute bubble
-    return(c(row[1], row[2], rank.difference.1, row[4], wins.1, row[6], row[7], bubble.1, interaction))
+    return(c(row[1], row[2], rank.difference.1, row[4], row[10], wins.1, row[6], row[7], bubble.1))
              #row[1], row[2], rank.difference.2, row[10], wins.2, row[8], row[7], bubble.2, interaction))
 }
 
 #num_results = as.integer(unlist(strsplit(xmlValue(tree$children$html[['body']][['div']][['div']][['div']][['div']
-url = "http://sumodb.sumogames.de/Query_bout.aspx?show_form=0&year=1989.01-2000.01&m=on&rowcount=5&offset=%d"
+url = "http://sumodb.sumogames.de/Query_bout.aspx?show_form=0&year=1989.01-2010.01&m=on&rowcount=5&offset=%d"
 tree = htmlTreeParse(sprintf(url, 0))
 num_results <- as.integer(strsplit(grep("[0-9]+ results found", unlist(tree$children$html[["body"]]), value=TRUE), " ")[[1]][[1]])
 
