@@ -77,26 +77,35 @@ setup_table_for_regression = function(row) {
              #row[1], row[2], rank.difference.2, row[10], wins.2, row[8], row[7], bubble.2, interaction))
 }
 
-# Fetch sumo data from sumodb
-## Get the number of items to fetch
-url = "http://sumodb.sumogames.de/Query_bout.aspx?show_form=0&year=1989.01-2010.01&m=on&rowcount=5&offset=%d"
-tree = htmlTreeParse(sprintf(url, 0))
-num_results <- as.integer(strsplit(grep("[0-9]+ results found", unlist(tree$children$html[["body"]]), value=TRUE), " ")[[1]][[1]])
+if(!file.exists("Sumo data 1989.01-2010.01 with 2 Shikona.Rda")) {
+    if(!file.exists("Sumo data 1989.01-2010.01 with 2 Shikona raw.Rda")) {
+        print("Couldn't find data files, downloading match data from SumoDB")
+        # Fetch sumo data from sumodb
+        ## Get the number of items to fetch
+        url = "http://sumodb.sumogames.de/Query_bout.aspx?show_form=0&year=1989.01-2010.01&m=on&rowcount=5&offset=%d"
+        tree = htmlTreeParse(sprintf(url, 0))
+        num_results <- as.integer(strsplit(grep("[0-9]+ results found", unlist(tree$children$html[["body"]]), value=TRUE), " ")[[1]][[1]])
 
-fetch_table <- function(offset) {
-    return(readHTMLTable(sprintf(url, offset), skip.rows=c(1), which=1, elFun=test_elFun, stringsAsFactors=FALSE))
+        fetch_table <- function(offset) {
+            return(readHTMLTable(sprintf(url, offset), skip.rows=c(1), which=1, elFun=test_elFun, stringsAsFactors=FALSE))
+        }
+
+        ## Scrape each 1000 item page to a table, then merge the tables
+        big_table_list <- Map(fetch_table, seq(from=0, to=num_results-1, by=1000))
+        big_table <- Reduce(function(...) merge(..., all=T, sort=FALSE), big_table_list)
+    } else {
+        load("Sumo data 1989.01-2010.01 with 2 Shikona.Rda")
+    }
+    names(big_table) <- c("Basho", "Day", "Rank.1", "Shikona.1", "Result.1", "Outcome.1", "Kimarite", "Outcome.2", "Rank.2", "Shikona.2", "Result.2")
+
+    # Reformat the table so we can perform our regressions
+    formatted_table <- t(apply(big_table, 1, setup_table_for_regression))
+    sumo.data <- data.frame("Basho"=formatted_table[,1], "Day"=formatted_table[,2], "Rank.Difference"=formatted_table[,3], 
+                                 "Shikona.1"=formatted_table[,4], "Shikona.2"=formatted_table[,5], "Wins"=formatted_table[,6], "Match.Outcome"=formatted_table[,7], 
+                                 "Kimarite"=formatted_table[,8], "Bubble"=formatted_table[,9])
+} else {
+    load("Sumo data 1989.01-2010.01 with 2 Shikona.Rda")
 }
-
-## Scrape each 1000 item page to a table, then merge the tables
-big_table_list <- Map(fetch_table, seq(from=0, to=num_results-1, by=1000))
-big_table <- Reduce(function(...) merge(..., all=T, sort=FALSE), big_table_list)
-names(big_table) <- c("Basho", "Day", "Rank.1", "Shikona.1", "Result.1", "Outcome.1", "Kimarite", "Outcome.2", "Rank.2", "Shikona.2", "Result.2")
-
-# Reformat the table so we can perform our regressions
-formatted_table <- t(apply(big_table, 1, setup_table_for_regression))
-sumo.data <- data.frame("Basho"=formatted_table[,1], "Day"=formatted_table[,2], "Rank.Difference"=formatted_table[,3], 
-                             "Shikona.1"=formatted_table[,4], "Shikona.2"=formatted_table[,5], "Wins"=formatted_table[,6], "Match.Outcome"=formatted_table[,7], 
-                             "Kimarite"=formatted_table[,8], "Bubble"=formatted_table[,9])
 sumo.data$Rank.Difference <- as.integer(as.character(sumo.data$Rank.Difference))
 sumo.glmdata <- sumo.data
 sumo.lmdata <- sumo.data
