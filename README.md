@@ -23,7 +23,7 @@ This project adds an additional ten years of data, from 1989 to 2010.
 # Results: #
 ## Excess Win Percentages For Wrestlers On The Margin By Day Of The Match ##
 ## LPM ##
-|On the Margin On:   				| (1)			| (2)           | (3)			| (4)           |
+|On the Margin On:   				| Model 1		| Model 2       | Model 3		| Model 4       |
 |-----------------------------------|---------------|---------------|---------------|---------------|
 |Day 15              				|.344 (.035)	|.282 (.036)    |.192 (.035)	|.189 (.035)    |
 |Day 14              				|.317 (.030)	|.266 (.033)    |.174 (.032)	|.172 (.032)    |
@@ -32,11 +32,11 @@ This project adds an additional ten years of data, from 1989 to 2010.
 |Day 11              				|.173 (.034)	|.144 (.032)    |.088 (.032)	|.087 (.032)    |
 |Rank Difference     				|--				|-.011 (.003)   |--				|-.002 (.003)   |
 |Constant            				|.5			    |.5             |--			    |--             |
-|Wrestler & Opponent Fixed Effects   |No				|No             |Yes			|Yes            |
-|Wrestler-Opponent Interactions      |No				|No             |No				|No             |
+|Wrestler & Opponent Fixed Effects  |No				|No             |Yes			|Yes            |
+|Wrestler-Opponent Interactions     |No				|No             |No				|No             |
 
 ## Logit ##
-|On the Margin On:   				| (1)			| (2)           | (3)			| (4)           |
+|On the Margin On:   				| Model 1		| Model 2       | Model 3		| Model 4       |
 |-----------------------------------|---------------|---------------|---------------|---------------|
 |Day 15              				|1.58 (.017)	|1.36 (.017)	|1.05 (.017)	|1.04 (.018)	|
 |Day 14              				|1.48 (.016)	|1.30 (.016)	|.981 (.017)	|.976 (.017)	|
@@ -45,8 +45,8 @@ This project adds an additional ten years of data, from 1989 to 2010.
 |Day 11              				|.889 (.016)	|.779 (.016)	|.593 (.017)	|.590 (.017)	|
 |Rank Difference     				|--				|-.459 (.003)   |--				|-.008 (.001)   |
 |Constant            				|0.0		    |0.0            |--			    |--             |
-|Wrestler & Opponent Fixed Effects   |No				|No             |Yes			|Yes            |
-|Wrestler-Opponent Interactions      |No				|No             |No				|No             |
+|Wrestler & Opponent Fixed Effects  |No				|No             |Yes			|Yes            |
+|Wrestler-Opponent Interactions     |No				|No             |No				|No             |
 
 Figures for models 5 and 6 are omitted, as software limitations prevented them from being run. 
 
