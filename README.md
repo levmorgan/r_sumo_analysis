@@ -47,14 +47,20 @@ This project adds an additional ten years of data, from 1989 to 2010.
 |Constant            				|0.0		    |0.0            |--			    |--             |
 |Wrestler & Opponent Fixed Effects  |No				|No             |Yes			|Yes            |
 |Wrestler-Opponent Interactions     |No				|No             |No				|No             |
+All regressors were significant at the p < 0.01 level.
 
 Figures for models 5 and 6 are omitted, as software limitations prevented them from being run. 
+
 
 # Conclusions #
 The results of the analysis generally matched those of Duncan and Levitt. In all cases, wrestlers 
 on the bubble had statistically significant increases in their odds of winning their matches 
 in the last four days of the tournament. Unlike in Duncan and Levitt's analysis, the increase in 
 probability of winning for wrestlers on the margin increases as fixed and interaction effects for 
-wrestlers are added to the model, but in this analysis they decreased. Though all increases are still 
-statistically significant (p < 0.01), this could indicate that the correlation is not as strong in this 
-dataset as it was in Duncan and Levitt's.
+wrestlers are added to the model, but in this analysis they decreased. All increases are still 
+statistically significant, though, (p < 0.01). This result is not unexpected, either, since the 
+wrestlers participating in the matches should account for a considerable amount of the variation in 
+the outcome. That is borne out by the fact that a chi square test on the fixed effects yields a p-value 
+far below 0.01. It is also notable that the odds ratios from the logistic regression that are given in 
+the table are significantly higher than the probabilities from the LPM, which may correspond to a better 
+fit model.
